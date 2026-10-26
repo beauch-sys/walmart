@@ -1,0 +1,27 @@
+{{
+    config(materialized='table')
+}}
+
+SELECT
+    STORE_ID,
+    DEPT_ID,
+    DATE,
+    STORE_WEEKLY_SALES,
+    FUEL_PRICE,
+    STORE_TEMPERATURE,
+    UNEMPLOYMENT,
+    CPI,
+    MARKDOWN_1,
+    MARKDOWN_2,
+    MARKDOWN_3,
+    MARKDOWN_4,
+    MARKDOWN_5,
+    DBT_VALID_FROM::TIMESTAMP_NTZ AS INSERT_DATE,
+    COALESCE(
+        DBT_VALID_TO,
+        DBT_VALID_FROM
+    )::TIMESTAMP_NTZ AS UPDATE_DATE,
+    DBT_VALID_FROM::TIMESTAMP_NTZ AS VRSN_START_DATE,
+    DBT_VALID_TO::TIMESTAMP_NTZ AS VRSN_END_DATE
+
+FROM {{ ref('walmart_fact_table_snapshot') }}
