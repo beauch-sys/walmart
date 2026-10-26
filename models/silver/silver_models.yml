@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: walmart_date_dim
+    description: "silver date dimension using SCD1"
+    columns:
+      - name: date_id
+        data_tests:
+          - not_null
+          - unique
+      - name: store_date
+        data_tests:
+          - not_null
+
+  - name: walmart_store_dim
+    description: "silver store dimension using SCD1"
+    columns:
+      - name: store_id
+        data_tests:
+          - not_null
+      - name: dept_id
+        data_tests:
+          - not_null
+      - name: store_type
+        data_tests:
+          - not_null
