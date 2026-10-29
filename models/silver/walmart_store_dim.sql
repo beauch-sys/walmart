@@ -24,18 +24,36 @@ WITH department_assignments AS (
         ORDER BY INSERTED_AT DESC NULLS LAST, "DATE" DESC NULLS LAST
     ) = 1
 ),
+
+deduplicated_stores AS (
+    SELECT
+        STORE_ID::INTEGER AS STORE_ID,
+        TYPE::VARCHAR AS STORE_TYPE,
+        SIZE::INTEGER AS STORE_SIZE
+    FROM {{ source('walmart_bronze', 'stores_raw') }}
+    WHERE STORE_ID IS NOT NULL
+    QUALIFY ROW_NUMBER() OVER (
+        PARTITION BY STORE_ID
+        ORDER BY
+            INSERTED_AT DESC NULLS LAST,
+            TYPE ASC NULLS LAST,
+            SIZE DESC NULLS LAST
+    ) = 1
+),
+
 transformed AS (
     SELECT
         d.STORE_ID,
         d.DEPT_ID,
-        s.TYPE::VARCHAR AS STORE_TYPE,
-        s.SIZE::INTEGER AS STORE_SIZE,
+        s.STORE_TYPE,
+        s.STORE_SIZE,
         CURRENT_TIMESTAMP()::TIMESTAMP_NTZ AS INSERT_DATE,
         CURRENT_TIMESTAMP()::TIMESTAMP_NTZ AS UPDATE_DATE
     FROM department_assignments AS d
-    INNER JOIN {{ source('walmart_bronze', 'stores_raw') }} AS s
+    INNER JOIN deduplicated_stores AS s
         ON d.STORE_ID = s.STORE_ID
 )
+
 SELECT * FROM transformed
 
 {% if is_incremental() %}
