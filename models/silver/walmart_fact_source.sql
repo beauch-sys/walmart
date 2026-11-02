@@ -17,7 +17,7 @@ WITH department_sales AS (
 ),
 store_features AS (
     SELECT
-        STORE_IDSTORE_ID,
+        STORE_ID,
         TO_DATE("DATE") AS DATE,
         TEMPERATURE AS STORE_TEMPERATURE,
         FUEL_PRICE,
